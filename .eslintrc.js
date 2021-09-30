@@ -16,5 +16,17 @@ module.exports = {
     'no-console': process.env.NODE_ENV === PRODUCTION ? ERROR : OFF,
     'no-debugger': process.env.NODE_ENV === PRODUCTION ? ERROR : OFF,
     'import/no-extraneous-dependencies': OFF,
+    'no-param-reassign': [ERROR, {
+      props: true,
+      ignorePropertyModificationsFor: [
+        'loaderContext',
+      ],
+    }],
+    'no-underscore-dangle': [ERROR, {
+      allow: [
+        '_source',
+        '_replacements',
+      ],
+    }],
   },
 };

@@ -31,7 +31,7 @@
     "src/loader.js"
   ],
   "scripts": {
-    "example:build": "webpack --config ./example/webpack.config.js --mode production",
+    "example:build": "webpack --config ./example/webpack.config.js --mode development",
     "example:serve": "webpack serve --config ./example/webpack.config.js --mode development",
     "lint": "eslint . --ext .js"
   },
