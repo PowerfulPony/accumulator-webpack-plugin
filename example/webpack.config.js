@@ -1,4 +1,6 @@
-const path = require('path');
+const { resolve } = require('path');
+const { Buffer } = require('buffer');
+const fs = require('fs/promises');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const {
@@ -6,23 +8,33 @@ const {
   loaderPath: accumulatorWebpackPluginLoader,
 } = require('../src/index');
 
+const metaFilename = 'meta.js';
+const artifactFilename = 'artifact.txt';
+const artifactReg = new RegExp(`${artifactFilename}$`);
+
 module.exports = {
   devtool: 'source-map',
-  entry: path.resolve(__dirname, 'index.js'),
+  entry: resolve(__dirname, 'index.js'),
   output: {
     filename: 'main.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: resolve(__dirname, 'dist'),
     clean: true,
   },
   devServer: {
-    static: path.resolve(__dirname, 'dist'),
+    static: resolve(__dirname, 'dist'),
     hot: true,
   },
   module: {
     rules: [
       {
         test: /.txt$/,
+        exclude: artifactReg,
         loader: accumulatorWebpackPluginLoader,
+      },
+      {
+        test: /.txt$/,
+        include: artifactReg,
+        type: 'asset/resource',
       },
     ],
   },
@@ -30,6 +42,31 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Example',
     }),
-    new AccumulatorWebpackPlugin(),
+    new AccumulatorWebpackPlugin({
+      metaFilename,
+      artifactFilename,
+      accumulate(register) {
+        const reads = register
+          .map(({ hash, path }) => fs.readFile(path)
+            .then((buffer) => ({
+              hash,
+              path,
+              buffer,
+            })));
+
+        return Promise.all(reads)
+          .then((items) => {
+            const index = {};
+            let offset = 0;
+            const buffer = Buffer.concat(items.map((item) => {
+              index[item.hash] = [offset, item.buffer.length];
+              offset += item.buffer.length;
+              return item.buffer;
+            }));
+
+            return { index, buffer };
+          });
+      },
+    }),
   ],
 };

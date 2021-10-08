@@ -1,13 +1,12 @@
 const { readFile } = require('fs');
 const { createHash } = require('crypto');
 
-const { metaModuleName } = require('./const');
-
 function loader() {
   const complete = this.async();
   const {
     resourcePath,
     regModule,
+    metaModulePath,
   } = this;
 
   readFile(resourcePath, (err, data) => {
@@ -23,7 +22,10 @@ function loader() {
       path: resourcePath,
     });
 
-    complete(null, `module.exports = require('${metaModuleName}').getData('${shortHash}');`);
+    complete(null, `"use strict";
+const meta = require(${JSON.stringify(metaModulePath)});
+const instance = meta.getData(${JSON.stringify(shortHash)});
+module.exports = instance`);
   });
 }
 

@@ -1,7 +1,7 @@
 const NAMESPACE = 'AccumulatorWebpackPlugin';
-const metaModuleName = 'metaModuleName';
+const packageName = 'accumulator-webpack-plugin';
 
 module.exports = {
   NAMESPACE,
-  metaModuleName,
+  packageName,
 };

@@ -1,10 +1,12 @@
-function genCodeMetaModule(register) {
+function genCodeMetaModule(index, artifactPath) {
   return `"use strict";
-const register = ${JSON.stringify(register, null, 2)};
+const artifact = require(${JSON.stringify(artifactPath)});
+const index = ${JSON.stringify(index, null, 2)};
 module.exports = {
-  register,
+  artifact,
+  index,
   getData(hash) {
-    return register[hash];
+    return index[hash];
   }
 }`;
 }
