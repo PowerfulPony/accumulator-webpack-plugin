@@ -1,6 +1,6 @@
 {
   "name": "accumulator-webpack-plugin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Webpack 5 plugin for accumulating data from loaders with batch processing",
   "author": "Victor Zakharenko <victor@pony.ninja>",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "url": "https://github.com/PowerfulPony/accumulator-webpack-plugin/issues"
   },
   "homepage": "https://github.com/PowerfulPony/accumulator-webpack-plugin#readme",
-  "main": "index.js",
+  "main": "src/index.js",
   "files": [
     "src/index.js",
     "src/const.js",
