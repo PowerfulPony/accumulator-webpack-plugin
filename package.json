@@ -1,0 +1,56 @@
+{
+  "name": "accumulator-webpack-plugin",
+  "version": "0.1.0",
+  "description": "Webpack 5 plugin for accumulating data from loaders with batch processing",
+  "author": "Victor Zakharenko <victor@pony.ninja>",
+  "license": "MIT",
+  "keywords": [
+    "webpack",
+    "plugin",
+    "loader",
+    "context",
+    "sprite",
+    "collector",
+    "accumulator",
+    "batch",
+    "replace"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PowerfulPony/accumulator-webpack-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PowerfulPony/accumulator-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/PowerfulPony/accumulator-webpack-plugin#readme",
+  "main": "src/index.js",
+  "files": [
+    "src/index.js",
+    "src/const.js",
+    "src/loader.js",
+    "src/Plugin.js",
+    "src/genCodeMetaModule.js"
+  ],
+  "scripts": {
+    "example:build": "webpack --config ./example/webpack.config.js --mode development",
+    "example:serve": "webpack serve --config ./example/webpack.config.js --mode development",
+    "lint": "eslint . --ext .js"
+  },
+  "devDependencies": {
+    "eslint": "^8.32.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.4",
+    "eslint-plugin-sonarjs": "^0.18.0",
+    "html-webpack-plugin": "^5.5.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "peerDependencies": {
+    "webpack": ">=5.0.0",
+    "webpack-sources": ">=2.0.0"
+  },
+  "dependencies": {
+    "webpack-virtual-modules": "^0.5.0"
+  }
+}

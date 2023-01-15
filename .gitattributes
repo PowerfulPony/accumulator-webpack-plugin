@@ -1,0 +1,13 @@
+# auto detect text files and normalize eol
+* text=auto eol=lf
+
+# text files
+*.js text eol=lf whitespace=trailing-space,space-before-tab,tab-in-indent,tabwidth=2
+*.json text eol=lf whitespace=trailing-space,space-before-tab,tab-in-indent,tabwidth=2
+*.md text eol=lf diff=markdown
+
+# certain files
+.editorconfig text eol=lf
+.eslintignore text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
