@@ -1,6 +1,6 @@
 const { Buffer } = require('buffer');
 const NormalModule = require('webpack/lib/NormalModule');
-const { ReplaceSource, RawSource } = require('webpack-sources');
+const { RawSource } = require('webpack-sources');
 const VirtualModulesPlugin = require('webpack-virtual-modules');
 
 const loaderPath = require.resolve('./loader.js');
@@ -30,11 +30,15 @@ class AccumulatorWebpackPlugin {
   }
 
   regModule({ hash, path }) {
-    this.register.push({
-      path,
-      hash,
-      use: true,
-    });
+    const updateModule = this.register.find((item) => item.path === path);
+    if (updateModule) updateModule.hash = hash;
+    else {
+      this.register.push({
+        path,
+        hash,
+        use: true,
+      });
+    }
 
     this.updateNeeded = true;
   }
@@ -49,52 +53,43 @@ class AccumulatorWebpackPlugin {
   }
 
   genMetaModule() {
-    return genCodeMetaModule(this.index, this.artifactModulePath);
+    return genCodeMetaModule(this.index, this.artifactModulePath, process.hrtime.bigint());
   }
 
-  writeVirtualModule() {
-    this.virtualModules.writeModule(`node_modules/${this.metaModulePath}`, this.genMetaModule());
+  findMetaModule({ modules }) {
+    return Array.from(modules)
+      .find((module) => !!this.metaModulePath.match(module.rawRequest));
   }
 
-  findMetaModule(compilation) {
-    return Array.from(compilation.modules)
-      .filter((module) => !!this.metaModulePath.match(module.rawRequest))[0];
-  }
-
-  findArtifactModule(compilation) {
-    return Array.from(compilation.modules)
-      .filter((module) => !!this.artifactModulePath.match(module.rawRequest))[0];
+  findArtifactModule({ modules }) {
+    return Array.from(modules)
+      .find((module) => !!this.artifactModulePath.match(module.rawRequest));
   }
 
   updateMetaModule(compilation, complete) {
     const metaModule = this.findMetaModule(compilation);
-    if (!(metaModule._source instanceof ReplaceSource)) {
-      metaModule._source = new ReplaceSource(metaModule._source);
-    } else {
-      metaModule._source._replacements = [];
-    }
 
     this.accumulate(this.getUsesModule())
       .then(({ index, buffer }) => {
         this.index = index;
 
-        metaModule._source.replace(0, metaModule._source.source().length, this.genMetaModule());
-
-        if (this.updateNeeded) {
-          this.writeVirtualModule();
-          this.updateNeeded = false;
-        }
-
         const artifactModule = this.findArtifactModule(compilation);
+        // TODO dirty hack for first update
+        this.virtualModules.writeModule(`node_modules/${this.artifactModulePath}`, Buffer.from(process.hrtime.bigint().toString(), 'utf-8'));
         artifactModule._source = new RawSource(buffer);
-        this.virtualModules.writeModule(`node_modules/${this.artifactModulePath}`, buffer);
+
+        const codegen = this.genMetaModule();
+        this.virtualModules.writeModule(`node_modules/${this.metaModulePath}`, codegen);
+        metaModule._source._value = codegen; // eslint-disable-line no-underscore-dangle
+        metaModule._source._valueAsBuffer = undefined; // eslint-disable-line no-underscore-dangle
+        metaModule._source._valueAsString = undefined; // eslint-disable-line no-underscore-dangle
 
         complete();
       });
   }
 
-  registerUpdate(compilation) {
-    const uses = Array.from(compilation.modules)
+  registerUpdate({ modules }) {
+    const uses = Array.from(modules)
       .filter(({ loaders }) => loaders.find((loader) => loader.loader === loaderPath))
       .map(({ resource }) => resource);
 
@@ -112,14 +107,15 @@ class AccumulatorWebpackPlugin {
     compilation.hooks.finishModules
       .tapAsync(NAMESPACE, (modules, complete) => {
         this.registerUpdate(compilation);
-        this.updateMetaModule(compilation, complete);
+        if (this.findMetaModule(compilation)) this.updateMetaModule(compilation, complete);
+        else complete();
       });
   }
 
   apply(compiler) {
     this.virtualModules = new VirtualModulesPlugin({
-      [`node_modules/${this.metaModulePath}`]: this.genMetaModule(),
       [`node_modules/${this.artifactModulePath}`]: Buffer.alloc(0),
+      [`node_modules/${this.metaModulePath}`]: this.genMetaModule(),
     });
     this.virtualModules.apply(compiler);
 

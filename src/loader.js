@@ -25,7 +25,7 @@ function loader() {
     complete(null, `"use strict";
 const meta = require(${JSON.stringify(metaModulePath)});
 const instance = meta.getData(${JSON.stringify(shortHash)});
-module.exports = instance`);
+module.exports = instance;`);
   });
 }
 

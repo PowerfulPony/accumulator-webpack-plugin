@@ -22,7 +22,6 @@ module.exports = {
   },
   devServer: {
     static: resolve(__dirname, 'dist'),
-    hot: true,
   },
   module: {
     rules: [
@@ -59,7 +58,11 @@ module.exports = {
             const index = {};
             let offset = 0;
             const buffer = Buffer.concat(items.map((item) => {
-              index[item.hash] = [offset, item.buffer.length];
+              index[item.hash] = {
+                path: item.path,
+                pos: offset,
+                len: item.buffer.length,
+              };
               offset += item.buffer.length;
               return item.buffer;
             }));
